@@ -1,6 +1,7 @@
 package com.jcaa.usersmanagement.infrastructure.config;
 
 import com.jcaa.usersmanagement.infrastructure.adapter.persistence.config.DatabaseConfig;
+import com.jcaa.usersmanagement.infrastructure.adapter.persistence.config.PostgresDatabaseConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
@@ -13,43 +14,35 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class DataSourceSpringConfig {
 
-  private static final String PROP_DB_HOST     = "${db.host}";
-  private static final String PROP_DB_PORT     = "${db.port}";
-  private static final String PROP_DB_NAME     = "${db.name}";
-  private static final String PROP_DB_USERNAME = "${db.username}";
-  private static final String PROP_DB_PASSWORD = "${db.password}";
+  private static final String ENGINE_POSTGRES = "postgres";
 
-  private static final String LOG_DATASOURCE_INIT = "[DataSourceSpringConfig] DataSource inicializado. host={} port={}";
-
-  @Value(PROP_DB_HOST)
-  private String dbHost;
-
-  @Value(PROP_DB_PORT)
-  private int dbPort;
-
-  @Value(PROP_DB_NAME)
-  private String dbName;
-
-  @Value(PROP_DB_USERNAME)
-  private String dbUsername;
-
-  @Value(PROP_DB_PASSWORD)
-  private String dbPassword;
+  @Value("${db.engine:mysql}")     private String dbEngine;
+  @Value("${db.host}")             private String dbHost;
+  @Value("${db.port}")             private int dbPort;
+  @Value("${db.name}")             private String dbName;
+  @Value("${db.username}")         private String dbUsername;
+  @Value("${db.password}")         private String dbPassword;
+  @Value("${db.sslmode:disable}")  private String dbSslMode;
 
   @Bean
   public DataSource dataSource() {
-    final DatabaseConfig config = new DatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword);
-
     final HikariConfig hikariConfig = new HikariConfig();
-    hikariConfig.setJdbcUrl(config.buildJdbcUrl());
-    hikariConfig.setUsername(config.username());
-    hikariConfig.setPassword(config.password());
-    hikariConfig.setMaximumPoolSize(10);
-    hikariConfig.setMinimumIdle(2);
+    hikariConfig.setJdbcUrl(buildJdbcUrl());
+    hikariConfig.setUsername(dbUsername);
+    hikariConfig.setPassword(dbPassword);
+    hikariConfig.setMaximumPoolSize(5);
+    hikariConfig.setMinimumIdle(1);
     hikariConfig.setConnectionTimeout(30_000);
 
-    log.info(LOG_DATASOURCE_INIT, dbHost, dbPort);
+    log.info("[DataSourceSpringConfig] engine={} host={} port={}", dbEngine, dbHost, dbPort);
     return new HikariDataSource(hikariConfig);
   }
-}
 
+  private String buildJdbcUrl() {
+    if (ENGINE_POSTGRES.equalsIgnoreCase(dbEngine)) {
+      return new PostgresDatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword, dbSslMode)
+          .buildJdbcUrl();
+    }
+    return new DatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword).buildJdbcUrl();
+  }
+}

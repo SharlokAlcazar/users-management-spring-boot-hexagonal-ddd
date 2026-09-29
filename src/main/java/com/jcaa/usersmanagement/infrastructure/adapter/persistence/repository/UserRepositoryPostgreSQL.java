@@ -29,8 +29,8 @@ import java.util.Optional;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "db.engine", havingValue = "mysql", matchIfMissing = true)
-public class UserRepositoryMySQL
+@ConditionalOnProperty(name = "db.engine", havingValue = "postgres")
+public class UserRepositoryPostgreSQL
     implements SaveUserPort,
         UpdateUserPort,
         GetUserByIdPort,
@@ -41,10 +41,10 @@ public class UserRepositoryMySQL
   private static final String SQL_INSERT =
       "INSERT INTO users "
       + "(id, name, email, password, role, status, created_at, updated_at) "
-      + "VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+      + "VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 
   private static final String SQL_UPDATE =
-      "UPDATE users SET name = ?, email = ?, password = ?, role = ?, status = ?, updated_at = NOW() "
+      "UPDATE users SET name = ?, email = ?, password = ?, role = ?, status = ?, updated_at = CURRENT_TIMESTAMP "
       + "WHERE id = ?";
 
   private static final String SQL_SELECT_BY_ID =
