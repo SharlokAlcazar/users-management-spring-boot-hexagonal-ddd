@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-1234567}
+      MYSQL_DATABASE: crud_usuarios
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD:-1234567}"]
+      interval: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file: [.env]
+    environment:
+      DB_ENGINE: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: crud_usuarios
+      DB_USERNAME: root
+    ports:
+      - "8080:8080"
