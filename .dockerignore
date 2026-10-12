@@ -1,7 +1,10 @@
-target/
-.git/
-.idea/
-.vscode/
+.git
+.github
+.idea
+.vscode
+.environments
+.env
+target
 *.iml
 *.log
-.env
+spec
