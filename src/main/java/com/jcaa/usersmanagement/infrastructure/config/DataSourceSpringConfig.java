@@ -43,6 +43,7 @@ public class DataSourceSpringConfig {
       return new PostgresDatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword, dbSslMode)
           .buildJdbcUrl();
     }
-    return new DatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword).buildJdbcUrl();
+    return new DatabaseConfig(dbHost, dbPort, dbName, dbUsername, dbPassword, dbSslMode)
+        .buildJdbcUrl();
   }
 }
